@@ -1,0 +1,89 @@
+<html>
+<head>
+<script src="https://www.gstatic.com/charts/loader.js">
+</script>
+<script src="CVSReader.js"></script>
+<script>
+google.charts.load('current', {
+  packages: ['corechart'] });
+google.charts.setOnLoadCallback(go);
+
+var myString;
+var myArray = [];
+var target = [];
+var searchText = 'CO2';
+var reader;
+function go() {
+    var fileInput = document.getElementById('fileInput');
+    var fileDisplayArea = document.getElementById('fileDisplayArea');
+
+    fileInput.addEventListener('change', function(e) {
+        var file = fileInput.files[0];
+        var textType1 = /application.*/;
+        var textType2 = /text.*/;
+
+        if (file.type.match(textType1) || file.type.match(textType2)) {
+          reader = new FileReader();
+			   reader.readAsText(file); 
+            reader.onload = function(e) {
+     			reCalculate();
+            };
+               
+        } else {
+            fileDisplayArea.innerText = "File not supported!";
+            return null;
+        }
+    });
+}
+function reCalculate(){
+    myString = reader.result;
+    myArray = CSVToArray(myString,',');
+    // [4] to [59] are the dates [2] is item
+	// we need to get data from myArray 
+	searchText = document.getElementById('search').value;
+	target = myArray.filter(chooseRow);  
+		        
+    drawChart(myArray[0], target)
+}
+function chooseRow(row){
+	if(row.length<3)return false;
+	else return row[2].includes(searchText);
+}
+
+function drawChart(header, data) {
+  var drawAt = document.getElementById('chart');
+  var myArray = [];
+  
+  myArray.push([{type: 'date', label: 'Date'},data[0][3]]);
+  for(var i = 4;i < data[1].length;i++){
+  	var d = new Date(parseInt(header[i]),0,0);
+
+  	myArray.push([d,Number(data[0][i])]);
+  }
+    console.log('charting-'+data[0][3]);
+  	console.log(JSON.stringify(myArray));
+  var dataTable = google.visualization.arrayToDataTable(myArray);
+
+  var chart = new google.visualization.ColumnChart(drawAt);
+  chart.draw(dataTable);
+}
+function changeSearch(){
+	searchText = document.getElementById('search').value;
+	reCalculate();
+}
+
+</script>
+
+</head>
+<body>
+<div id="page-wrapper">
+    <h1>Text File Reader</h1>
+    <div>
+        Select a text file: 
+        <input type="file" id="fileInput">
+    </div>
+    <div> <h3> search for </h3><input type='text' id='search' value='CO2' onchange = 'changeSearch()'> </div>
+    <div id="chart" style="width: 900px; height: 500px;"></div>
+</div>
+</body>
+</html>
