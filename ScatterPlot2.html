@@ -1,0 +1,101 @@
+<html>
+<script src="https://www.gstatic.com/charts/loader.js">
+</script>
+<script>
+google.charts.load('current', {
+    packages: ['corechart']
+});
+google.charts.setOnLoadCallback(go);
+var data = [];
+var options;
+var button;
+var chart;
+/**
+ * go generates random data and renders it in Google Charts
+ * @return {[type]}
+ */
+function go() {
+    chart = new google.visualization.ScatterChart(document.getElementById('chart'));
+    // options controls how the chart is drawn
+    options = {
+        title: 'World Bank USA',
+        series: {
+            0: {
+                type: "scatter"
+            }
+        },
+
+        vAxis: {
+            minValue: -1,
+            maxValue: 1
+        },
+
+        trendlines: {
+            0: {
+                color: 'purple',
+                lineWidth: 10,
+                opacity: 0.5,
+                type: 'polynomial',
+                degree: 2,
+                showR2: true,
+                visibleInLegend: true,
+            }
+        },
+        animation: {
+            duration: 4000,
+            easing: 'out'
+        }
+    };
+    button = document.getElementById('b1');
+    button.onclick = function() {
+        generateData(n);
+        drawChart(data);
+    };
+    var n = 20;
+    generateData(n);
+    drawChart(data);
+}
+/**
+ * @param  {integer} n=number of points
+ * @return {array} n random numbers
+ */
+function generateData(n) {
+    for (var i = 0; i < n; i++) {
+        data[i] = getRandomNumber();
+    }
+    return data;
+}
+/**
+ * @param  {array} data = array of n random numbers
+ * @return {none}
+ */
+function drawChart(data) {
+    var dataSet = [];
+    // construct rows consisting of array[2]
+    dataSet.push(['fred', 'people']);
+    for (var i = 0; i < data.length; i++) {
+        dataSet.push([getRandomNumber()*20, data[i]]);
+    }
+
+    button.disabled = true;
+    google.visualization.events.addListener(chart, 'ready',
+        function() {
+            button.disabled = false;
+            button.value = 'Step';
+        });
+
+    var dataTable = google.visualization.arrayToDataTable(dataSet);
+
+    chart.draw(dataTable, options);
+}
+
+function getRandomNumber() {
+    return Math.floor(Math.random() * 20);
+}
+</script>
+<body>
+  <div> <input type='button' id ='b1' value="step" onclick= 'go()'>
+  </div>
+    <div id="chart" style="width: 1000px; height: 300px;">Hello</div>
+</body>
+</html>
